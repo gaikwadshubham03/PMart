@@ -13,6 +13,9 @@ namespace PMart.Controllers
 
 		public CartController(ILogger<CartController> logger)
 		{
+			if (logger == null)
+				throw new ArgumentNullException(nameof(logger));
+
 			_logger = logger;
 		}
 
