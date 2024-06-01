@@ -9,15 +9,24 @@ namespace PMart.Controllers
 	public class CartController : ControllerBase
 	{
 		private static List<Item> cartItems = new List<Item>();
+		private readonly ILogger<CartController> _logger;
+
+		public CartController(ILogger<CartController> logger)
+		{
+			_logger = logger;
+		}
+
 
 		[HttpPost]
 		public IActionResult AddItem([FromBody] Item item)
 		{
-			if (item == null || item.Quantity <= 0)
+			if (!ModelState.IsValid)
 			{
-				return BadRequest("Invalid item data");
+				_logger.LogWarning("Invalid item data received.");
+				return BadRequest(ModelState);
 			}
 			cartItems.Add(item);
+			_logger.LogInformation($"Item added to cart: {item.Name}, Quantity: {item.Quantity}, Price: {item.Price}");
 			return Ok(item);
 		}
 
@@ -25,6 +34,7 @@ namespace PMart.Controllers
 		[HttpGet]
 		public IActionResult GetItems()
 		{
+			_logger.LogInformation("Fetching all items in the cart.");
 			return Ok(cartItems);
 		}
 	}
