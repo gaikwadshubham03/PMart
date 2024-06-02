@@ -10,7 +10,7 @@ using PMart.Models;
 namespace PMart.Controllers
 {
 	[ApiController]
-	[Route("api/[controller]")]
+	[Route("api/cart")]
 	public class CartController : ControllerBase
 	{
 		//private static List<Item> cartItems = new List<Item>();
@@ -19,7 +19,7 @@ namespace PMart.Controllers
 
 		public CartController(ApplicationDbContext context, ILogger<CartController> logger)
 		{
-			if (logger == null)
+			if (logger == null || context == null)
 				throw new ArgumentNullException(nameof(logger));
 
 			_context = context;
@@ -28,21 +28,25 @@ namespace PMart.Controllers
 
 
 		[HttpPost]
+		[Route("additem")]
 		public async Task<IActionResult> AddItem([FromBody] Item item)
 		{
-			if (!ModelState.IsValid)
+			if (item == null)
 			{
-				_logger.LogWarning("Invalid item data received.");
-				return BadRequest(ModelState);
+				return BadRequest("Item is null");
 			}
-			_context.Items.Add(item);
+
+			var itemDTO = new ItemDTO(item.Name, item.Price, item.Quantity);
+
+			_context.Items.Add(itemDTO);
 			await _context.SaveChangesAsync();
-			_logger.LogInformation($"Item added to cart: {item.Name}, Quantity: {item.Quantity}, Price: {item.Price}");
-			return Ok(item);
+			_logger.LogInformation($"Item added to cart: {itemDTO.Name}, Quantity: {itemDTO.Quantity}, Price: {itemDTO.Price}");
+			return Ok(itemDTO);
 		}
 
 
 		[HttpGet]
+		[Route("items")]
 		public async Task<IActionResult> GetItems()
 		{
 			_logger.LogInformation("Fetching all items in the cart.");

@@ -7,7 +7,7 @@ namespace PMart.Data
 	{
 		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
 
-		public DbSet<Item> Items { get; set; }
+		public DbSet<ItemDTO> Items { get; set; }
 
 	}
 }
