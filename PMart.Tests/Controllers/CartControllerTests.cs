@@ -102,5 +102,53 @@ namespace PMart.Tests.Controllers
 			Assert.IsNotNull(result);
 			Assert.AreEqual(result.Value, "Item is null");
 		}
+
+		[TestMethod]
+		public async Task GetEmptyCardItem()
+		{
+
+			var context = new ApplicationDbContext(_options);
+			context.SaveChanges();
+
+			var controller = new CartController(context!, _loggerMock!.Object);
+
+
+			var list = await controller.GetItems();
+
+			var listItems = (list as OkObjectResult);
+
+			Assert.IsNotNull(listItems);
+			var items = (listItems.Value) as List<ItemDTO>;
+			Assert.IsNotNull(items);
+			Assert.AreEqual(items.Count, 0);
+		}
+
+		// Integration Test
+		[TestMethod]
+		public async Task GetCardItem()
+		{
+
+			var context = new ApplicationDbContext(_options);
+			context.SaveChanges();
+
+			var controller = new CartController(context!, _loggerMock!.Object);
+			var addItem = new Item("Item1", 5.99, 10);
+
+			var addedItem = await controller.AddItem(addItem);
+
+			var list = await controller.GetItems();
+
+			var listItems = (list as OkObjectResult);
+
+			Assert.IsNotNull(listItems);
+			var items = (listItems.Value) as List<ItemDTO>;
+			Assert.IsNotNull(items);
+			var item = items[0];
+			Assert.AreEqual(item.Name, addItem.Name);
+			Assert.AreEqual(item.Quantity, addItem.Quantity);
+			Assert.AreEqual(item.Price, addItem.Price);
+
+		}
+
 	}
 }
