@@ -1,9 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Author:      Shubham Gaikwad
+// Date:        06/01/2024
+
+using System.ComponentModel.DataAnnotations;
 
 namespace PMart.Models
 {
 	public class Item
 	{
+
+		[Key]
+		public int Id { get; set; }
+
 		[Required]
 		public string Name { get; set; }
 

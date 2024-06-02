@@ -16,3 +16,8 @@ bld/
 
 # Visual Studio Code
 .vscode/
+
+# Ignore SQLite database files
+*.db
+*.db-shm
+*.db-wal
