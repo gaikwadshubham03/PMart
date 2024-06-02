@@ -1,5 +1,7 @@
-﻿// Author:      Shubham Gaikwad
+﻿#region Header
+// Author:      Shubham Gaikwad
 // Date:        06/01/2024
+#endregion
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +15,16 @@ namespace PMart.Controllers
 	[Route("api/cart")]
 	public class CartController : ControllerBase
 	{
-		//private static List<Item> cartItems = new List<Item>();
+		#region Non-Public Data Members
 		private readonly ApplicationDbContext _context;
 		private readonly ILogger<CartController> _logger;
+		#endregion
+
+		#region Non-Public Properties/Methods
+		#endregion
+
+
+		#region Public Properties/Methods
 
 		public CartController(ApplicationDbContext context, ILogger<CartController> logger)
 		{
@@ -53,5 +62,6 @@ namespace PMart.Controllers
 			var items = await _context.Items.ToListAsync();
 			return Ok(items);
 		}
+		#endregion
 	}
 }

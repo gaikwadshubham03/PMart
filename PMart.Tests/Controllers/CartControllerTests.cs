@@ -1,3 +1,8 @@
+#region Header
+// Author:      Shubham Gaikwad
+// Date:        06/01/2024
+#endregion
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,147 +13,136 @@ using PMart.Models;
 
 namespace PMart.Tests.Controllers
 {
-	[TestClass]
-	public class CartControllerTests
-	{
-		private DbContextOptions<ApplicationDbContext> _options;
-		private ApplicationDbContext? _context;
-		private Mock<ILogger<CartController>>? _loggerMock;
+    [TestClass]
+    public class CartControllerTests
+    {
+        private DbContextOptions<ApplicationDbContext>? _options;
+        private ApplicationDbContext? _context;
+        private Mock<ILogger<CartController>>? _loggerMock;
 
-		[TestInitialize]
-		public void Setup()
-		{
+        [TestInitialize]
+        public void Setup()
+        {
+            _options = new DbContextOptionsBuilder<ApplicationDbContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase")
+                .Options;
+            _context = new ApplicationDbContext(_options);
+            _loggerMock = new Mock<ILogger<CartController>>();
+        }
 
-			_options = new DbContextOptionsBuilder<ApplicationDbContext>()
-			   .UseInMemoryDatabase(databaseName: "TestDatabase")
-			   .Options;
-			_context = new ApplicationDbContext(_options);
-			_loggerMock = new Mock<ILogger<CartController>>();
+        [TestMethod]
+        public void CartBothNull()
+        {
+            Assert.ThrowsException<ArgumentNullException>(() => new CartController(null!, null!));
+        }
 
+        [TestMethod]
+        public void CartNullContext()
+        {
+            if (_loggerMock != null && _context == null)
+            {
+                Assert.ThrowsException<ArgumentNullException>(
+                    () => new CartController(null!, _loggerMock.Object)
+                );
+            }
+        }
 
+        [TestMethod]
+        public void CartNullLogger()
+        {
+            if (_loggerMock == null && _context != null)
+            {
+                Assert.ThrowsException<ArgumentNullException>(
+                    () => new CartController(_context, null!)
+                );
+            }
+        }
 
-		}
+        [TestMethod]
+        public void CartInitizationValid()
+        {
+            if (_context != null && _loggerMock != null)
+            {
+                var controller = new CartController(_context, _loggerMock.Object);
+                Assert.IsNotNull(controller);
+            }
+        }
 
-		[TestMethod]
-		public void CartBothNull()
-		{
-			Assert.ThrowsException<ArgumentNullException>(() => new CartController(null!, null!));
+        [TestMethod]
+        public async Task CartAddItemValid()
+        {
+            var context = new ApplicationDbContext(_options!);
+            context.SaveChanges();
 
-		}
+            var controller = new CartController(context!, _loggerMock!.Object);
+            var addItem = new Item("Item2", 5.99, 10);
 
-		[TestMethod]
-		public void CartNullContext()
-		{
-			if (_loggerMock != null && _context == null)
-			{
-				Assert.ThrowsException<ArgumentNullException>(() => new CartController(null!, _loggerMock.Object));
-			}
-		}
+            var addedItem = await controller.AddItem(addItem);
 
-		[TestMethod]
-		public void CartNullLogger()
-		{
-			if (_loggerMock == null && _context != null)
-			{
-				Assert.ThrowsException<ArgumentNullException>(() => new CartController(_context, null!));
-			}
-		}
+            var result = addedItem as OkObjectResult;
+            Assert.IsNotNull(result);
+            var item = result.Value as Item;
+            Assert.IsNotNull(item);
+            Assert.AreEqual(item.Name, addItem.Name);
+            Assert.AreEqual(item.Price, addItem.Price);
+            Assert.AreEqual(item.Quantity, addItem.Quantity);
+        }
 
+        [TestMethod]
+        public async Task CartAddInvalidItem()
+        {
+            var context = new ApplicationDbContext(_options!);
+            context.SaveChanges();
 
+            var controller = new CartController(context!, _loggerMock!.Object);
 
-		[TestMethod]
-		public void CartInitizationValid()
-		{
-			if (_context != null && _loggerMock != null)
-			{
-				var controller = new CartController(_context, _loggerMock.Object);
-				Assert.IsNotNull(controller);
-			}
-		}
+            var error = await controller.AddItem(null!);
+            var result = error as BadRequestObjectResult;
+            Assert.IsNotNull(result);
+            Assert.AreEqual(result.Value, "Item is null");
+        }
 
-		[TestMethod]
-		public async Task CartAddItemValid()
-		{
+        [TestMethod]
+        public async Task GetEmptyCardItem()
+        {
+            var context = new ApplicationDbContext(_options!);
+            context.SaveChanges();
 
-			var context = new ApplicationDbContext(_options);
-			context.SaveChanges();
+            var controller = new CartController(context!, _loggerMock!.Object);
 
-			var controller = new CartController(context!, _loggerMock!.Object);
-			var addItem = new Item("Item2", 5.99, 10);
+            var list = await controller.GetItems();
 
-			var addedItem = await controller.AddItem(addItem);
+            var listItems = (list as OkObjectResult);
 
-			var result = addedItem as OkObjectResult;
-			Assert.IsNotNull(result);
-			var item = result.Value as Item;
-			Assert.IsNotNull(item);
-			Assert.AreEqual(item.Name, addItem.Name);
-			Assert.AreEqual(item.Price, addItem.Price);
-			Assert.AreEqual(item.Quantity, addItem.Quantity);
-		}
+            Assert.IsNotNull(listItems);
+            var items = (listItems.Value) as List<ItemDTO>;
+            Assert.IsNotNull(items);
+            Assert.AreEqual(items.Count, 0);
+        }
 
+        // Integration Test
+        [TestMethod]
+        public async Task GetCardItem()
+        {
+            var context = new ApplicationDbContext(_options!);
+            context.SaveChanges();
 
-		[TestMethod]
-		public async Task CartAddInvalidItem()
-		{
+            var controller = new CartController(context!, _loggerMock!.Object);
+            var addItem = new Item("Item1", 5.99, 10);
 
-			var context = new ApplicationDbContext(_options);
-			context.SaveChanges();
+            var addedItem = await controller.AddItem(addItem);
 
-			var controller = new CartController(context!, _loggerMock!.Object);
+            var list = await controller.GetItems();
 
-			var error = await controller.AddItem(null!);
-			var result = error as BadRequestObjectResult;
-			Assert.IsNotNull(result);
-			Assert.AreEqual(result.Value, "Item is null");
-		}
+            var listItems = (list as OkObjectResult);
 
-		[TestMethod]
-		public async Task GetEmptyCardItem()
-		{
-
-			var context = new ApplicationDbContext(_options);
-			context.SaveChanges();
-
-			var controller = new CartController(context!, _loggerMock!.Object);
-
-
-			var list = await controller.GetItems();
-
-			var listItems = (list as OkObjectResult);
-
-			Assert.IsNotNull(listItems);
-			var items = (listItems.Value) as List<ItemDTO>;
-			Assert.IsNotNull(items);
-			Assert.AreEqual(items.Count, 0);
-		}
-
-		// Integration Test
-		[TestMethod]
-		public async Task GetCardItem()
-		{
-
-			var context = new ApplicationDbContext(_options);
-			context.SaveChanges();
-
-			var controller = new CartController(context!, _loggerMock!.Object);
-			var addItem = new Item("Item1", 5.99, 10);
-
-			var addedItem = await controller.AddItem(addItem);
-
-			var list = await controller.GetItems();
-
-			var listItems = (list as OkObjectResult);
-
-			Assert.IsNotNull(listItems);
-			var items = (listItems.Value) as List<ItemDTO>;
-			Assert.IsNotNull(items);
-			var item = items[0];
-			Assert.AreEqual(item.Name, addItem.Name);
-			Assert.AreEqual(item.Quantity, addItem.Quantity);
-			Assert.AreEqual(item.Price, addItem.Price);
-
-		}
-
-	}
+            Assert.IsNotNull(listItems);
+            var items = (listItems.Value) as List<ItemDTO>;
+            Assert.IsNotNull(items);
+            var item = items[0];
+            Assert.AreEqual(item.Name, addItem.Name);
+            Assert.AreEqual(item.Quantity, addItem.Quantity);
+            Assert.AreEqual(item.Price, addItem.Price);
+        }
+    }
 }
