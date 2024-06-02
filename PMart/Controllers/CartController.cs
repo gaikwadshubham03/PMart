@@ -38,19 +38,19 @@ namespace PMart.Controllers
 
 		[HttpPost]
 		[Route("additem")]
-		public async Task<IActionResult> AddItem([FromBody] Item item)
+		public async Task<IActionResult> AddItem([FromBody] ItemDTO item)
 		{
 			if (item == null)
 			{
 				return BadRequest("Item is null");
 			}
 
-			var itemDTO = new ItemDTO(item.Name, item.Price, item.Quantity);
+			var newItem = new Item(item.Name, item.Price, item.Quantity);
 
-			_context.Items.Add(itemDTO);
+			_context.Items.Add(newItem);
 			await _context.SaveChangesAsync();
-			_logger.LogInformation($"Item added to cart: {itemDTO.Name}, Quantity: {itemDTO.Quantity}, Price: {itemDTO.Price}");
-			return Ok(itemDTO);
+			_logger.LogInformation($"Item added to cart: {newItem.Name}, Quantity: {newItem.Quantity}, Price: {newItem.Price}");
+			return Ok(newItem);
 		}
 
 
