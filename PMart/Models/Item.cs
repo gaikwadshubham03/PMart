@@ -7,9 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PMart.Models
 {
-    /// <summary>
-    /// Represents an item in the PMart inventory.
-    /// </summary>
+    // Represents an item in the PMart inventory.
     public class Item
     {
         [Key]

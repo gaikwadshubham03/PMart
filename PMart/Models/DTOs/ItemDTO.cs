@@ -7,9 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PMart.Models
 {
-    /// <summary>
-    /// Represents a Data Transfer Object (DTO) for an item in the PMart inventory.
-    /// </summary>
+    // Represents a Data Transfer Object (DTO) for an item in the PMart inventory.
     public class ItemDTO
     {
         [Required(ErrorMessage = "The name of the item is required")]
