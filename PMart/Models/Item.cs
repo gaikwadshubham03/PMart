@@ -7,12 +7,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace PMart.Models
 {
+    /// <summary>
+    /// Represents an item in the PMart inventory.
+    /// </summary>
     public class Item
     {
         [Key]
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "The name of the item is required")]
         public string Name { get; set; }
 
         [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than zero")]
