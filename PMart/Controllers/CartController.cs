@@ -10,9 +10,7 @@ using PMart.Models;
 
 namespace PMart.Controllers
 {
-    /// <summary>
-    /// Controller for managing cart-related operations.
-    /// </summary>
+    // Controller for managing cart-related operations.
     [ApiController]
     [Route("api/cart")]
     public class CartController : ControllerBase
@@ -37,13 +35,9 @@ namespace PMart.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Adds a new item to the cart.
-        /// </summary>
-        /// <param name="item">The item to be added.</param>
-        /// <returns>A response indicating the result of the operation.</returns>
+        // Adds a new item to the cart
         [HttpPost]
-        [Route("additem")]
+        [Route("item")]
         public async Task<IActionResult> AddItem([FromBody] ItemDTO item)
         {
             if (item == null)
@@ -61,10 +55,7 @@ namespace PMart.Controllers
             return Ok(newItem);
         }
 
-        /// <summary>
-        /// Gets all items in the cart.
-        /// </summary>
-        /// <returns>A response with the list of items.</returns>
+        // Gets all items in the cart.
         [HttpGet]
         [Route("items")]
         public async Task<IActionResult> GetItems()

@@ -8,17 +8,13 @@ using PMart.Models;
 
 namespace PMart.Data
 {
-	/// <summary>
-    /// Represents the database context for the PMart application.
-    /// </summary>
-	public class ApplicationDbContext : DbContext
-	{
-		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-			: base(options) { }
+    // Represents the database context for the PMart application.
+    public class ApplicationDbContext : DbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options) { }
 
-		/// <summary>
-        /// Represents Item table in database
-        /// </summary>
-		public DbSet<Item> Items { get; set; }
-	}
+        // Represents Item table in database
+        public DbSet<Item> Items { get; set; }
+    }
 }

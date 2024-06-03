@@ -13,9 +13,6 @@ using PMart.Models;
 
 namespace PMart.Tests.Controllers
 {
-    /// <summary>
-    /// Unit tests for the <see cref="CartController"/>.
-    /// </summary>
     [TestClass]
     public class CartControllerTests
     {
@@ -23,9 +20,6 @@ namespace PMart.Tests.Controllers
         private ApplicationDbContext? _context;
         private Mock<ILogger<CartController>>? _loggerMock;
 
-        /// <summary>
-        /// Initializes the test setup.
-        /// </summary>
         [TestInitialize]
         public void Setup()
         {
@@ -36,18 +30,12 @@ namespace PMart.Tests.Controllers
             _loggerMock = new Mock<ILogger<CartController>>();
         }
 
-        /// <summary>
-        /// Tests that the constructor throws an exception if both context and logger are null.
-        /// </summary>
         [TestMethod]
         public void CartBothNull()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new CartController(null!, null!));
         }
 
-        /// <summary>
-        /// Tests that the constructor throws an exception if the context is null.
-        /// </summary>
         [TestMethod]
         public void CartNullContext()
         {
@@ -59,9 +47,6 @@ namespace PMart.Tests.Controllers
             }
         }
 
-        /// <summary>
-        /// Tests that the constructor throws an exception if the logger is null.
-        /// </summary>
         [TestMethod]
         public void CartNullLogger()
         {
@@ -73,9 +58,6 @@ namespace PMart.Tests.Controllers
             }
         }
 
-        /// <summary>
-        /// Tests that the constructor initializes successfully with valid parameters.
-        /// </summary>
         [TestMethod]
         public void CartInitizationValid()
         {
@@ -86,9 +68,6 @@ namespace PMart.Tests.Controllers
             }
         }
 
-        /// <summary>
-        /// Tests adding a valid item to the cart.
-        /// </summary>
         [TestMethod]
         public async Task CartAddItemValid()
         {
@@ -109,9 +88,6 @@ namespace PMart.Tests.Controllers
             Assert.AreEqual(item.Quantity, addItem.Quantity);
         }
 
-        /// <summary>
-        /// Tests adding an invalid item (null) to the cart.
-        /// </summary>
         [TestMethod]
         public async Task CartAddInvalidItem()
         {
@@ -126,11 +102,8 @@ namespace PMart.Tests.Controllers
             Assert.AreEqual(result.Value, "Item is null");
         }
 
-        /// <summary>
-        /// Tests retrieving items from an empty cart.
-        /// </summary>
         [TestMethod]
-        public async Task GetEmptyCardItem()
+        public async Task GetEmptyCartItem()
         {
             var context = new ApplicationDbContext(_options!);
             context.SaveChanges();
@@ -147,11 +120,8 @@ namespace PMart.Tests.Controllers
             Assert.AreEqual(items.Count, 0);
         }
 
-        /// <summary>
-        /// Integration test for adding an item and then retrieving it from the cart.
-        /// </summary>
         [TestMethod]
-        public async Task GetCardItem()
+        public async Task GetSingleCartItem()
         {
             var context = new ApplicationDbContext(_options!);
             context.SaveChanges();
@@ -172,6 +142,34 @@ namespace PMart.Tests.Controllers
             Assert.AreEqual(item.Name, addItem.Name);
             Assert.AreEqual(item.Quantity, addItem.Quantity);
             Assert.AreEqual(item.Price, addItem.Price);
+        }
+
+        [TestMethod]
+        public async Task GetMultipleCartItem()
+        {
+            var context = new ApplicationDbContext(_options!);
+            context.SaveChanges();
+
+            var controller = new CartController(context!, _loggerMock!.Object);
+            var item1 = new ItemDTO("Item1", 5.99, 10);
+            var item2 = new ItemDTO("Item2", 6, 10);
+            var item3 = new ItemDTO("Item 3", 7, 10);
+
+            var result1 = await controller.AddItem(item1);
+            var result2 = await controller.AddItem(item2);
+            var result3 = await controller.AddItem(item3);
+
+            var list = await controller.GetItems();
+
+            var listItems = (list as OkObjectResult);
+
+            Assert.IsNotNull(listItems);
+            var items = (listItems.Value) as List<Item>;
+            Assert.IsNotNull(items);
+            var item = items[2];
+            Assert.AreEqual(item.Name, item3.Name);
+            Assert.AreEqual(item.Quantity, item3.Quantity);
+            Assert.AreEqual(item.Price, item3.Price);
         }
     }
 }
