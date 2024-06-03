@@ -50,7 +50,7 @@ Here are the available API endpoints for the shopping cart service:
 
 ### Add an Item
 
-- **URL:** `/api/cart/additem`
+- **URL:** `/api/cart/item`
 - **Method:** `POST`
 - **Request Body:**
     ```json
@@ -84,4 +84,4 @@ The application exposes Prometheus metrics for monitoring purposes.
 
 To view the metrics locally, run the application and navigate to `localhost/metrics` while interacting with APIs to view the counters increment
 
-
+![alt text](asset/prometheus.png)
